@@ -14,6 +14,7 @@ public interface VoucherService {
     VoucherDTO changeHotStatus(String id, VoucherDTO voucherDTO);
     List<VoucherDTO> findAllByUserId(String userId);
 
+    VoucherDTO findById(String voucherId);
     List<VoucherDTO> findAllByTourType(TourType tourType);
     List<VoucherDTO> findAllByTransferType(String transferType);
     List<VoucherDTO> findAllByPrice(Double price);

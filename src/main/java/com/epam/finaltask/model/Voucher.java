@@ -3,11 +3,18 @@ package com.epam.finaltask.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Voucher {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String title;
@@ -28,6 +35,8 @@ public class Voucher {
 
     private LocalDate evictionDate;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     private boolean isHot;
