@@ -1,4 +1,13 @@
 package com.epam.finaltask.auth.dto;
 
-public record LoginRequest(String username, String password) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+
+public record LoginRequest(
+        @NotEmpty
+        @NotBlank
+        String username,
+        @NotEmpty
+        @NotBlank
+        String password) {
 }

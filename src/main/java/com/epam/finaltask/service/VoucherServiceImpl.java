@@ -1,14 +1,21 @@
 package com.epam.finaltask.service;
 
 import com.epam.finaltask.dto.VoucherDTO;
+import com.epam.finaltask.dto.VoucherSearchParameters;
+import com.epam.finaltask.dto.VoucherSpecifications;
 import com.epam.finaltask.mapper.VoucherMapper;
 import com.epam.finaltask.model.*;
 import com.epam.finaltask.repository.UserRepository;
 import com.epam.finaltask.repository.VoucherRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +37,9 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public VoucherDTO order(String id, String userId) {
         var voucherToOrder = this.voucherRepository.findById(UUID.fromString(id)).orElseThrow(() -> new IllegalArgumentException("No voucher found with such an id"));
+        if (voucherToOrder.getUser() != null) {
+            throw new IllegalStateException("Voucher is already assigned to another user");
+        }
         var user = this.userRepository.findById(UUID.fromString(userId)).orElseThrow(() -> new UsernameNotFoundException("No user found with such an username"));
         voucherToOrder.setUser(user);
         user.getVouchers().add(voucherToOrder);
@@ -149,11 +159,50 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    public List<VoucherDTO> findAllByParameters(Pageable pageable, VoucherSearchParameters parameters) {
+        Specification<Voucher> spec = Specification
+                .where(VoucherSpecifications.hasHotelType(parameters.hotelType()))
+                .and(VoucherSpecifications.hasTourType(parameters.tourType()))
+                .and(VoucherSpecifications.hasTransferType(parameters.transferType()))
+                .and(VoucherSpecifications.hasPriceGreaterThanOrEqual(BigDecimal.valueOf(Double.parseDouble(parameters.priceMin()))))
+                .and(VoucherSpecifications.hasPriceLessThanOrEqual(BigDecimal.valueOf(Double.parseDouble(parameters.priceMax()))));
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "isHot")
+        );
+
+        return voucherRepository.findAll(spec, sortedPageable)
+                .getContent()
+                .stream().map(voucherMapper::toVoucherDTO).toList();
+    }
+
+    @Override
     public List<VoucherDTO> findAll() {
         var finalCollection = this.voucherRepository.findAll().stream().map(voucherMapper::toVoucherDTO).toList();
         if(finalCollection == null){
             return List.of();
         }
         return finalCollection;
+    }
+
+    @Override
+    public VoucherDTO changeVoucherStatus(String id, String status) {
+        try{
+            var targetVoucher = this.voucherRepository.findById(UUID.fromString(id));
+            Voucher voucher;
+            if(targetVoucher.isPresent()){
+                voucher = targetVoucher.get();
+                voucher.setStatus(VoucherStatus.valueOf(status));
+                this.voucherRepository.save(voucher);
+                return voucherMapper.toVoucherDTO(voucher);
+            }
+            else{
+                throw new IllegalArgumentException();
+            }
+        } catch(IllegalArgumentException e){
+            return null;
+        }
     }
 }

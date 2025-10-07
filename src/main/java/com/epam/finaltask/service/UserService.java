@@ -1,7 +1,9 @@
 package com.epam.finaltask.service;
 
+import java.util.Optional;
 import java.util.UUID;
 
+import com.epam.finaltask.auth.dto.ChangePasswordRequest;
 import com.epam.finaltask.dto.UserDTO;
 
 public interface UserService {
@@ -12,4 +14,8 @@ public interface UserService {
     UserDTO getUserByUsername(String username);
     UserDTO changeAccountStatus(UserDTO userDTO);
     UserDTO getUserById(UUID id);
+    boolean existsById(UUID id);
+    Optional<UserDTO> blockUser(String id);
+    Optional<UserDTO> unblockUser(String id);
+    Optional<UserDTO> changePassword(String id, ChangePasswordRequest newPassword);
 }

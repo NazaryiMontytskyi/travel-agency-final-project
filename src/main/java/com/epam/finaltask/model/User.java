@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,7 @@ public class User {
     private Role role;
 
 	@OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private List<Voucher> vouchers;
 
     private String phoneNumber;

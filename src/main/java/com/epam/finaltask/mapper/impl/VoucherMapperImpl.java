@@ -23,6 +23,7 @@ public class VoucherMapperImpl implements VoucherMapper {
                 .arrivalDate(voucherDTO.getArrivalDate())
                 .evictionDate(voucherDTO.getEvictionDate())
                 .user(User.builder().id(voucherDTO.getUserId()).build())
+                .isHot(voucherDTO.getIsHot())
                 .build();
 
     }
@@ -40,7 +41,8 @@ public class VoucherMapperImpl implements VoucherMapper {
                 .status(voucher.getStatus().toString())
                 .arrivalDate(voucher.getArrivalDate())
                 .evictionDate(voucher.getEvictionDate())
-                .userId(voucher.getUser().getId())
+                .userId(voucher.getUser() != null ? voucher.getUser().getId() : null)
+                .isHot(voucher.isHot())
                 .build();
 
     }

@@ -4,6 +4,7 @@ import com.epam.finaltask.auth.dto.AuthResponse;
 import com.epam.finaltask.auth.dto.LoginRequest;
 import com.epam.finaltask.auth.dto.RegisterRequest;
 import com.epam.finaltask.dto.UserDTO;
+import com.epam.finaltask.model.Role;
 import com.epam.finaltask.repository.UserRepository;
 import com.epam.finaltask.service.UserService;
 import com.epam.finaltask.token.JwtService;
@@ -26,6 +27,8 @@ public class AuthenticationService {
         UserDTO dto = new UserDTO();
         dto.setUsername(registerRequest.username());
         dto.setPassword(registerRequest.password());
+        dto.setPhoneNumber(registerRequest.phoneNumber());
+        dto.setRole(Role.USER.name());
 
         UserDTO savedUser = userService.register(dto);
         String token = jwtService.generateToken(savedUser.getUsername());
@@ -39,6 +42,7 @@ public class AuthenticationService {
                         request.password()
                 )
         );
+
 
         UserDTO user = userService.getUserByUsername(request.username());
         String token = jwtService.generateToken(user.getUsername());
