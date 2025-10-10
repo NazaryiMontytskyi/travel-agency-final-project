@@ -7,6 +7,11 @@ import com.epam.finaltask.model.HotelType;
 import com.epam.finaltask.model.TourType;
 import com.epam.finaltask.model.TransferType;
 import com.epam.finaltask.service.VoucherService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,12 +28,18 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/vouchers")
 @RequiredArgsConstructor
+@Tag(name = "Voucher Management", description = "APIs for managing vouchers")
 public class VoucherRestController {
 
     private final VoucherService voucherService;
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAuthority('user:read') or hasAuthority('admin:read')")
+    @Operation(summary = "Find all vouchers for a user", description = "Returns a list of all vouchers belonging to a specific user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved vouchers"),
+            @ApiResponse(responseCode = "204", description = "No vouchers found for this user", content = @Content)
+    })
     public ResponseEntity<Map<String, Object>> findAllVouchers(@PathVariable String userId) {
         var resultingVouchers = voucherService.findAllByUserId(userId);
         if(resultingVouchers == null){
@@ -41,6 +52,11 @@ public class VoucherRestController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('admin:create')")
+    @Operation(summary = "Create a new voucher", description = "Creates a new voucher with the provided data.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Voucher created successfully"),
+            @ApiResponse(responseCode = "204", description = "Request body is empty", content = @Content)
+    })
     public ResponseEntity<Map<String, Object>> createVoucher(@Valid @RequestBody VoucherDTO voucherDTO) {
         if(voucherDTO == null){
             return ResponseEntity.noContent().build();
@@ -55,6 +71,8 @@ public class VoucherRestController {
 
     @PatchMapping("/{voucherId}/status")
     @PreAuthorize("hasAuthority('manager:update') or hasAuthority('admin:update')")
+    @Operation(summary = "Change a voucher's 'hot' status", description = "Sets or unsets the 'hot' status for a voucher.")
+    @ApiResponse(responseCode = "200", description = "Voucher status changed successfully")
     public ResponseEntity<Map<String, Object>> changeHotStatus(@PathVariable String voucherId, @Valid @RequestBody VoucherDTO voucherDTO) {
         Map<String, Object> response = new HashMap<>();
         var changedStatus = this.voucherService.changeHotStatus(voucherId, voucherDTO);
@@ -67,6 +85,8 @@ public class VoucherRestController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read') or hasAuthority('admin:read')")
+    @Operation(summary = "Find all vouchers", description = "Returns a list of all available vouchers.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved vouchers")
     public ResponseEntity<Map<String, Object>> findAll(){
         Map<String, Object> response = new HashMap<>();
         List<VoucherDTO> vouchers = this.voucherService.findAll();
@@ -77,6 +97,8 @@ public class VoucherRestController {
 
     @PatchMapping("/{voucherId}")
     @PreAuthorize("hasAuthority('admin:update')")
+    @Operation(summary = "Update a voucher", description = "Updates the details of an existing voucher.")
+    @ApiResponse(responseCode = "200", description = "Voucher updated successfully")
     public ResponseEntity<Map<String, Object>> updateVoucher(@PathVariable String voucherId, @Valid @RequestBody VoucherDTO voucherDTO) {
         Map<String, Object> response = new HashMap<>();
         var updatedValue = this.voucherService.update(voucherId, voucherDTO);
@@ -89,6 +111,8 @@ public class VoucherRestController {
 
     @DeleteMapping("/{voucherId}")
     @PreAuthorize("hasAuthority('admin:delete')")
+    @Operation(summary = "Delete a voucher", description = "Deletes a voucher by its ID.")
+    @ApiResponse(responseCode = "200", description = "Voucher deleted successfully")
     public ResponseEntity<Map<String, Object>> deleteVoucher(@PathVariable String voucherId){
         Map<String, Object> response = new HashMap<>();
         this.voucherService.delete(voucherId);
@@ -99,6 +123,8 @@ public class VoucherRestController {
 
     @PostMapping("/{id}/user/{userId}")
     @PreAuthorize("hasAuthority('user:update')")
+    @Operation(summary = "Order a voucher", description = "Assigns a voucher to a user.")
+    @ApiResponse(responseCode = "200", description = "Voucher ordered successfully")
     public ResponseEntity<VoucherDTO> orderVoucher(@PathVariable String id, @PathVariable String userId){
         var ordered = this.voucherService.order(id, userId);
         return ResponseEntity.ok(ordered);
@@ -106,6 +132,11 @@ public class VoucherRestController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:read') or hasAuthority('admin:read')")
+    @Operation(summary = "Find a voucher by ID", description = "Returns a single voucher by its unique identifier.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved voucher"),
+            @ApiResponse(responseCode = "404", description = "Voucher not found", content = @Content)
+    })
     public ResponseEntity<VoucherDTO> findById(@PathVariable String id){
         var foundVoucher = this.voucherService.findById(id);
         if(foundVoucher == null){
@@ -116,6 +147,11 @@ public class VoucherRestController {
 
     @GetMapping("/tourType/{tourType}")
     @PreAuthorize("hasAuthority('user:read') or hasAuthority('admin:read')")
+    @Operation(summary = "Find vouchers by tour type", description = "Returns a list of vouchers matching the specified tour type.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved vouchers"),
+            @ApiResponse(responseCode = "400", description = "Invalid tour type", content = @Content)
+    })
     public ResponseEntity<List<VoucherDTO>> findAllByTourType(@PathVariable String tourType){
         TourType targetType;
         try{
@@ -132,6 +168,11 @@ public class VoucherRestController {
 
     @GetMapping("/transferType/{transferType}")
     @PreAuthorize("hasAuthority('user:read') or hasAuthority('admin:read')")
+    @Operation(summary = "Find vouchers by transfer type", description = "Returns a list of vouchers matching the specified transfer type.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved vouchers"),
+            @ApiResponse(responseCode = "400", description = "Invalid transfer type", content = @Content)
+    })
     public ResponseEntity<List<VoucherDTO>> findAllByTransferType(@PathVariable String transferType){
         TransferType targetType;
         try{
@@ -145,6 +186,11 @@ public class VoucherRestController {
 
     @GetMapping("/price/{price}")
     @PreAuthorize("hasAuthority('user:read') or hasAuthority('admin:read')")
+    @Operation(summary = "Find vouchers by price", description = "Returns a list of vouchers with a price less than or equal to the specified value.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved vouchers"),
+            @ApiResponse(responseCode = "400", description = "Invalid price value", content = @Content)
+    })
     public ResponseEntity<List<VoucherDTO>> findAllByPrice(@PathVariable String price){
         var doublePrice = Double.parseDouble(price);
         if(doublePrice < 0.0){
@@ -156,6 +202,11 @@ public class VoucherRestController {
 
     @GetMapping("/hotelType/{hotelType}")
     @PreAuthorize("hasAuthority('user:read') or hasAuthority('admin:read')")
+    @Operation(summary = "Find vouchers by hotel type", description = "Returns a list of vouchers matching the specified hotel type.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved vouchers"),
+            @ApiResponse(responseCode = "400", description = "Invalid hotel type", content = @Content)
+    })
     public ResponseEntity<List<VoucherDTO>> findAllByHotel(@PathVariable String hotelType){
         HotelType targetType;
         try{
@@ -169,6 +220,11 @@ public class VoucherRestController {
 
     @PatchMapping("/status/{id}")
     @PreAuthorize("hasAuthority('manager:update') or hasAuthority('admin:update')")
+    @Operation(summary = "Change voucher status", description = "Changes the status of an existing voucher.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Voucher status changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request", content = @Content)
+    })
     public ResponseEntity<VoucherDTO> changeStatus(@PathVariable String id, @Valid @RequestBody StatusUpdateRequest status){
         return Optional.ofNullable(this.voucherService.changeVoucherStatus(id, status.getStatus()))
                 .map(ResponseEntity::ok)
@@ -177,6 +233,8 @@ public class VoucherRestController {
 
     @GetMapping("/all")
     @PreAuthorize("true")
+    @Operation(summary = "Find all vouchers by parameters", description = "Returns a paginated list of vouchers matching the specified search parameters.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved vouchers")
     public ResponseEntity<List<VoucherDTO>> findAllByParams(Pageable pageable, @RequestBody VoucherSearchParameters params){
         return ResponseEntity.ok(this.voucherService.findAllByParameters(pageable, params));
     }
