@@ -21,6 +21,7 @@ public class InitUserConfig implements CommandLineRunner {
         user.setUsername(env.getProperty("custom.user.username"));
         user.setPassword(env.getProperty("custom.user.password"));
         user.setRole(Role.USER.name());
+        user.setBalance(10000.0);
 
         UserDTO admin = new UserDTO();
         admin.setUsername(env.getProperty("custom.admin.username"));

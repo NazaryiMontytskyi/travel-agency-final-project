@@ -29,6 +29,7 @@
                         <li class="list-group-item">
                             <strong th:text="#{label.balance}">Balance:</strong>
                             <span th:text="${#numbers.formatCurrency(user.balance)}">$0.00</span>
+                            <a th:href="@{/account/deposit}" class="btn btn-sm btn-outline-success float-end">Top up</a>
                         </li>
                         <li class="list-group-item">
                             <strong>Role:</strong>
@@ -43,7 +44,7 @@
                         </li>
                     </ul>
                     <div class="mt-3">
-                        <a href="#" class="btn btn-primary" th:text="#{button.edit} + ' Profile'">Edit Profile</a>
+                        <a th:href="@{/account/edit}" class="btn btn-primary" th:text="#{button.edit} + ' Profile'">Edit Profile</a>
                     </div>
                 </div>
             </div>
@@ -72,6 +73,10 @@
                                 Status
                             </span>
                         </div>
+                        <form th:if="${voucher.status.name() != 'CANCELED'}"
+                              th:action="@{/account/vouchers/{id}/cancel(id=${voucher.id})}" method="post">
+                            <button type="submit" class="btn btn-sm btn-danger" th:text="#{button.cancel}">Cancel</button>
+                        </form>
                     </div>
                 </div>
             </div>

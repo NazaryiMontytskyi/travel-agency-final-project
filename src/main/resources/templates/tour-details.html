@@ -14,10 +14,8 @@
         <div class="card-body">
             <p><strong th:text="#{tour.description}">Description:</strong> <span th:text="${tour.description}"></span></p>
             <p><strong th:text="#{tour.price}">Price:</strong> <span th:text="${tour.price}"></span></p>
-            <div class="mt-4">
-                <a th:href="@{/order/{id}(id=${tour.id})}" class="btn btn-success btn-lg" sec:authorize="isAuthenticated()" th:text="#{button.order}">Order Tour</a>
-                <a th:href="@{/login}" class="btn btn-info btn-lg" sec:authorize="!isAuthenticated()">Login to Order</a>
-            </div>
+            <a th:href="@{/order/{id}(id=${tour.id})}" class="btn btn-success btn-lg"
+               sec:authorize="isAuthenticated()" th:text="#{button.order}">Order Tour</a>
         </div>
     </div>
 </main>

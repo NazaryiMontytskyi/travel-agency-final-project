@@ -1,6 +1,10 @@
 package com.epam.finaltask.controllers;
 
 import com.epam.finaltask.dto.VoucherDTO;
+import com.epam.finaltask.dto.VoucherSearchParameters;
+import com.epam.finaltask.model.HotelType;
+import com.epam.finaltask.model.TourType;
+import com.epam.finaltask.model.TransferType;
 import com.epam.finaltask.service.VoucherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,29 +30,23 @@ public class HomeController {
     public String homePage(Model model,
                            @RequestParam(value = "page", defaultValue = "1") int page,
                            @RequestParam(value = "size", defaultValue = "6") int size,
-                           @RequestParam(value = "keyword", required = false) String keyword) {
+                           VoucherSearchParameters searchParams) {
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        List<VoucherDTO> allTours = voucherService.findAll();
+        List<VoucherDTO> filteredTours = voucherService.findAllByParameters(pageable, searchParams);
 
-        if (keyword != null && !keyword.isEmpty()) {
-            allTours = allTours.stream()
-                    .filter(tour -> tour.getTitle().toLowerCase().contains(keyword.toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), allTours.size());
-        Page<VoucherDTO> tourPage = new PageImpl<>(allTours.subList(start, end), pageable, allTours.size());
+        Page<VoucherDTO> tourPage = new PageImpl<>(filteredTours, pageable, voucherService.findAll().size());
 
         model.addAttribute("tourPage", tourPage);
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("searchParams", searchParams);
+
+        model.addAttribute("hotelTypes", HotelType.values());
+        model.addAttribute("tourTypes", TourType.values());
+        model.addAttribute("transferTypes", TransferType.values());
 
         int totalPages = tourPage.getTotalPages();
         if (totalPages > 0) {
-            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-                    .boxed()
-                    .collect(Collectors.toList());
+            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages).boxed().collect(Collectors.toList());
             model.addAttribute("pageNumbers", pageNumbers);
         }
 

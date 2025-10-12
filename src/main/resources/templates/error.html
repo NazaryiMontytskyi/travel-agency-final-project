@@ -24,7 +24,7 @@
 </head>
 <body>
 <div class="error-container">
-    <img th:src="@{/images/error-panda.jpg}" alt="Server Error" class="error-image mb-4"/>
+    <img th:src="@{/images/error-panda.png}" alt="Server Error" class="error-image mb-4"/>
 
     <h1 th:text="${errorMessage}">Error</h1>
     <h1 th:unless="${statusCode != null}">An Error Occurred</h1>

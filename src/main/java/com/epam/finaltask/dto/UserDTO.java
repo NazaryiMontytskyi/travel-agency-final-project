@@ -27,8 +27,6 @@ public class UserDTO {
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 
-	@NotNull
-	@NotBlank
 	private String role;
 
 	private List<Voucher> vouchers;

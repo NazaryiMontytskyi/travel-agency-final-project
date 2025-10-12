@@ -1,6 +1,8 @@
 package com.epam.finaltask.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,10 +39,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO updateUser(String username, UserDTO userDTO) {
 		User user = userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No user found with such username"));
-		user.setUsername(userDTO.getUsername());
-		user.setPhoneNumber(userDTO.getPhoneNumber());
-		user.setBalance(BigDecimal.valueOf(userDTO.getBalance()));
-		user.setVouchers(userDTO.getVouchers());
+		user.setUsername(userDTO.getUsername() == null ? "" : userDTO.getUsername());
+		user.setPhoneNumber(userDTO.getPhoneNumber() == null ? "" : userDTO.getPhoneNumber());
+		user.setBalance(BigDecimal.valueOf(userDTO.getBalance() == null ? 0.0 : userDTO.getBalance()));
+		user.setVouchers(userDTO.getVouchers() == null ? new ArrayList<>() : userDTO.getVouchers());
 		User updated = userRepository.save(user);
 		return userMapper.toUserDTO(updated);
 	}
@@ -106,6 +108,20 @@ public class UserServiceImpl implements UserService {
 					}
 					return userMapper.toUserDTO(user);
 				});
+	}
+
+	@Override
+	public List<UserDTO> findAll() {
+		return this.userRepository.findAll().stream().map(userMapper::toUserDTO).toList();
+	}
+
+	@Override
+	public void updateUserBalance(String username, Double amountChange) {
+		User user = userRepository.findUserByUsername(username)
+				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+		BigDecimal newBalance = user.getBalance().add(BigDecimal.valueOf(amountChange));
+		user.setBalance(newBalance);
+		userRepository.save(user);
 	}
 
 }

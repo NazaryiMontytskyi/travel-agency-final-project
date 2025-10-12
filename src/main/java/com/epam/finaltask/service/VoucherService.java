@@ -24,4 +24,5 @@ public interface VoucherService {
     List<VoucherDTO> findAllByParameters(Pageable pageable, VoucherSearchParameters parameters);
     List<VoucherDTO> findAll();
     VoucherDTO changeVoucherStatus(String id, String status);
+    void cancelOrder(String voucherId, String username);
 }

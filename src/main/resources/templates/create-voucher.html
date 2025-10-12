@@ -1,0 +1,65 @@
+<!-- src/main/resources/templates/create-voucher.html -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Create New Voucher</title>
+  <th:block th:insert="~{layout :: head}"></th:block>
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main class="container mt-4">
+  <h2>Create New Voucher</h2>
+  <form th:action="@{/admin/vouchers/new}" th:object="${voucher}" method="post">
+    <div class="mb-3">
+      <label for="title" class="form-label">Title</label>
+      <input type="text" id="title" class="form-control" th:field="*{title}" required>
+      <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea id="description" class="form-control" th:field="*{description}" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+      <label for="price" class="form-label">Price</label>
+      <input type="number" id="price" class="form-control" th:field="*{price}" step="0.01" required>
+      <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="tourType" class="form-label">Tour Type</label>
+        <select id="tourType" class="form-select" th:field="*{tourType}">
+          <option th:each="type : ${tourTypes}" th:value="${type}" th:text="${type}"></option>
+        </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="transferType" class="form-label">Transfer Type</label>
+        <select id="transferType" class="form-select" th:field="*{transferType}">
+          <option th:each="type : ${transferTypes}" th:value="${type}" th:text="${type}"></option>
+        </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="hotelType" class="form-label">Hotel Type</label>
+        <select id="hotelType" class="form-select" th:field="*{hotelType}">
+          <option th:each="type : ${hotelTypes}" th:value="${type}" th:text="${type}"></option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="arrivalDate" class="form-label">Arrival Date</label>
+        <input type="date" id="arrivalDate" class="form-control" th:field="*{arrivalDate}" required>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('arrivalDate')}" th:errors="*{arrivalDate}"></div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="evictionDate" class="form-label">Eviction Date</label>
+        <input type="date" id="evictionDate" class="form-control" th:field="*{evictionDate}" required>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('evictionDate')}" th:errors="*{evictionDate}"></div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Voucher</button>
+    <a th:href="@{/admin/panel}" class="btn btn-secondary">Cancel</a>
+  </form>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

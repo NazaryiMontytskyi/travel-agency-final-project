@@ -1,6 +1,7 @@
 package com.epam.finaltask.controllers;
 
 import com.epam.finaltask.dto.UserDTO;
+import com.epam.finaltask.dto.VoucherDTO;
 import com.epam.finaltask.service.UserService;
 import com.epam.finaltask.service.VoucherService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,13 @@ public class TourController {
     public String processOrder(@PathVariable String id, Principal principal, RedirectAttributes redirectAttributes) {
         try {
             UserDTO currentUser = userService.getUserByUsername(principal.getName());
+            VoucherDTO voucher = voucherService.findById(id);
+
+            if (currentUser.getBalance() < voucher.getPrice()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Insufficient funds to order this tour. Please top up your balance.");
+                return "redirect:/tours/" + id;
+            }
+
             voucherService.order(id, currentUser.getId());
             return "redirect:/payment/" + id;
         } catch (Exception e) {

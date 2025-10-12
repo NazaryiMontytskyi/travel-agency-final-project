@@ -36,13 +36,13 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="tour : ${allTours}">
+                            <tr th:each="tour : ${allTours}" th:if="${tour.userId == null}">
                                 <td th:text="${tour.id}"></td>
                                 <td th:text="${tour.title}"></td>
                                 <td th:text="${tour.price}"></td>
                                 <td>
-                                    <a href="#" class="btn btn-primary btn-sm" th:text="#{button.edit}">Edit</a>
-                                    <form th:action="@{/admin/tours/{id}/delete(id=${tour.id})}" method="post" class="d-inline">
+                                    <a th:href="@{/admin/vouchers/{id}/edit(id=${tour.id})}" class="btn btn-primary btn-sm" th:text="#{button.edit}">Edit</a>
+                                    <form th:action="@{/admin/vouchers/{id}/delete(id=${tour.id})}" method="post" class="d-inline">
                                         <button type="submit" class="btn btn-danger btn-sm" th:text="#{button.delete}">Delete</button>
                                     </form>
                                 </td>

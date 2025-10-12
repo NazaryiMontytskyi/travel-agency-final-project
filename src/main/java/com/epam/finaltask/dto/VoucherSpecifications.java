@@ -40,14 +40,18 @@ public class VoucherSpecifications {
 
     public static Specification<Voucher> hasPriceGreaterThanOrEqual(BigDecimal priceMin) {
         return (root, query, cb) -> {
-            if (priceMin == null) return null;
+            if (priceMin == null) {
+                return cb.conjunction();
+            }
             return cb.greaterThanOrEqualTo(root.get("price"), priceMin);
         };
     }
 
     public static Specification<Voucher> hasPriceLessThanOrEqual(BigDecimal priceMax) {
         return (root, query, cb) -> {
-            if (priceMax == null) return null;
+            if (priceMax == null) {
+                return cb.conjunction();
+            }
             return cb.lessThanOrEqualTo(root.get("price"), priceMax);
         };
     }

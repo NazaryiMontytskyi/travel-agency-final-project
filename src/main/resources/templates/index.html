@@ -9,13 +9,39 @@
 <main class="container mt-4">
     <div th:if="${paymentSuccess}" class="alert alert-success" th:text="${paymentSuccess}"></div>
 
+    <!-- src/main/resources/templates/index.html -->
     <div class="card mb-4">
         <div class="card-body">
-            <form th:action="@{/}" method="get" class="row g-3">
-                <div class="col-md-10">
-                    <input type="text" name="keyword" class="form-control" th:placeholder="#{label.search.title}" th:value="${keyword}">
+            <form th:action="@{/}" method="get" class="row g-3" th:object="${searchParams}">
+                <!-- Tour Type -->
+                <div class="col-md-3">
+                    <select class="form-select" th:field="*{tourType}">
+                        <option value="" th:text="#{tour.type} + '...'">Tour Type...</option>
+                        <option th:each="type : ${tourTypes}" th:value="${type}" th:text="${type}"></option>
+                    </select>
                 </div>
-                <div class="col-md-2">
+                <!-- Transfer Type -->
+                <div class="col-md-3">
+                    <select class="form-select" th:field="*{transferType}">
+                        <option value="" th:text="#{tour.transfer} + '...'">Transfer Type...</option>
+                        <option th:each="type : ${transferTypes}" th:value="${type}" th:text="${type}"></option>
+                    </select>
+                </div>
+                <!-- Hotel Type -->
+                <div class="col-md-3">
+                    <select class="form-select" th:field="*{hotelType}">
+                        <option value="" th:text="#{tour.hotel} + '...'">Hotel Type...</option>
+                        <option th:each="type : ${hotelTypes}" th:value="${type}" th:text="${type}"></option>
+                    </select>
+                </div>
+                <!-- Price Range -->
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="number" class="form-control" placeholder="Min Price" th:field="*{priceMin}">
+                        <input type="number" class="form-control" placeholder="Max Price" th:field="*{priceMax}">
+                    </div>
+                </div>
+                <div class="col-12">
                     <button type="submit" class="btn btn-primary w-100" th:text="#{button.search}">Search</button>
                 </div>
             </form>

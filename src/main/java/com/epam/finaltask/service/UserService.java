@@ -1,5 +1,6 @@
 package com.epam.finaltask.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,4 +19,6 @@ public interface UserService {
     Optional<UserDTO> blockUser(String id);
     Optional<UserDTO> unblockUser(String id);
     Optional<UserDTO> changePassword(String id, ChangePasswordRequest newPassword);
+    List<UserDTO> findAll();
+    void updateUserBalance(String username, Double amountChange);
 }
