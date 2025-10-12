@@ -43,6 +43,7 @@ public class Voucher {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonBackReference
+    @ToString.Exclude
     private User user;
 
     private boolean isHot;

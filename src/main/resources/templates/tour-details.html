@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="${tour.title}">Tour Details</title>
+    <th:block th:insert="~{layout :: head}"></th:block>
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 th:text="${tour.title}">Tour Title</h2>
+        </div>
+        <div class="card-body">
+            <p><strong th:text="#{tour.description}">Description:</strong> <span th:text="${tour.description}"></span></p>
+            <p><strong th:text="#{tour.price}">Price:</strong> <span th:text="${tour.price}"></span></p>
+            <div class="mt-4">
+                <a th:href="@{/order/{id}(id=${tour.id})}" class="btn btn-success btn-lg" sec:authorize="isAuthenticated()" th:text="#{button.order}">Order Tour</a>
+                <a th:href="@{/login}" class="btn btn-info btn-lg" sec:authorize="!isAuthenticated()">Login to Order</a>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

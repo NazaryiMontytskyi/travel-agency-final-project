@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="#{menu.admin_panel}">Admin Panel</title>
+    <th:block th:insert="~{layout :: head}"></th:block>
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+
+<main class="container mt-4">
+    <h1 th:text="#{menu.admin_panel}">Admin Panel</h1>
+    <p class="lead" th:text="'Welcome, Administrator ' + ${user.username} + '!'"></p>
+
+    <ul class="nav nav-tabs" id="adminTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tours-tab" data-bs-toggle="tab" data-bs-target="#tours" type="button" role="tab" aria-controls="tours" aria-selected="true" th:text="#{section.title.tour_management}">Tour Management</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="false" th:text="#{section.title.user_management}">User Management</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabContent">
+        <div class="tab-pane fade show active" id="tours" role="tabpanel" aria-labelledby="tours-tab">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <a href="#" class="btn btn-success mb-3" th:text="#{button.add} + ' Tour'">Add New Tour</a>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th th:text="#{tour.title}">Title</th>
+                                <th th:text="#{tour.price}">Price</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="tour : ${allTours}">
+                                <td th:text="${tour.id}"></td>
+                                <td th:text="${tour.title}"></td>
+                                <td th:text="${tour.price}"></td>
+                                <td>
+                                    <a href="#" class="btn btn-primary btn-sm" th:text="#{button.edit}">Edit</a>
+                                    <form th:action="@{/admin/tours/{id}/delete(id=${tour.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm" th:text="#{button.delete}">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="users" role="tabpanel" aria-labelledby="users-tab">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="u : ${allUsers}">
+                                <td th:text="${u.id}"></td>
+                                <td th:text="${u.username}"></td>
+                                <td th:text="${u.role}"></td>
+                                <td>
+                                    <span class="badge" th:classappend="${u.active} ? 'bg-success' : 'bg-secondary'" th:text="${u.active} ? 'Active' : 'Blocked'"></span>
+                                </td>
+                                <td>
+                                    <form th:if="${u.active}" th:action="@{/admin/users/{id}/block(id=${u.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-warning btn-sm" th:text="#{button.block}">Block</button>
+                                    </form>
+                                    <form th:if="${!u.active}" th:action="@{/admin/users/{id}/unblock(id=${u.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-success btn-sm" th:text="#{button.unblock}">Unblock</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>
