@@ -98,16 +98,18 @@ public class UserServiceImpl implements UserService {
 				});
 	}
 
+
 	@Override
 	public Optional<UserDTO> changePassword(String id, ChangePasswordRequest request) {
-		return this.userRepository.findById(UUID.fromString(id))
-				.map(user -> {
-					if(encoder.encode(request.oldPassword()).equals(user.getPassword())){
-						user.setPassword(encoder.encode(request.newPassword()));
-						this.userRepository.save(user);
-					}
-					return userMapper.toUserDTO(user);
-				});
+		User user = this.userRepository.findById(UUID.fromString(id))
+				.orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+
+		if (encoder.matches(request.oldPassword(), user.getPassword())) {
+			user.setPassword(encoder.encode(request.newPassword()));
+			user = this.userRepository.save(user);
+		}
+
+		return Optional.of(userMapper.toUserDTO(user));
 	}
 
 	@Override
@@ -122,6 +124,16 @@ public class UserServiceImpl implements UserService {
 		BigDecimal newBalance = user.getBalance().add(BigDecimal.valueOf(amountChange));
 		user.setBalance(newBalance);
 		userRepository.save(user);
+	}
+
+	@Override
+	public Optional<UserDTO> changeUserRole(String id, String role) {
+		return userRepository.findById(UUID.fromString(id))
+				.map(user -> {
+					user.setRole(Role.valueOf(role));
+					userRepository.save(user);
+					return userMapper.toUserDTO(user);
+				});
 	}
 
 }

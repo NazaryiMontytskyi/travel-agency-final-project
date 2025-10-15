@@ -1,46 +1,41 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Manager Dashboard</title>
+    <title th:text="#{page.title.manager}">Manager Dashboard</title>
     <th:block th:insert="~{layout :: head}"></th:block>
 </head>
 <body>
 <div th:replace="~{layout :: header}"></div>
 <main class="container mt-4">
-    <h1>Manager Dashboard</h1>
+    <h1 th:text="#{page.title.manager}">Manager Dashboard</h1>
     <div class="card mt-4">
-        <div class="card-header"><h3>Tour Management</h3></div>
+        <div class="card-header"><h3 th:text="#{section.title.tour_management}">Tour Management</h3></div>
         <div class="card-body">
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Hot Status</th>
-                    <th>Actions</th>
+                    <th th:text="#{tour.title}">Title</th>
+                    <th th:text="#{tour.status}">Status</th>
+                    <th th:text="#{table.header.hot_status}">Hot Status</th>
+                    <th th:text="#{table.header.actions}">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="tour : ${allTours}">
                     <td th:text="${tour.title}"></td>
-                    <td th:text="${tour.status}"></td>
-                    <td>
-                        <span th:text="${tour.isHot} ? 'Yes' : 'No'"></span>
-                    </td>
+                    <td th:text="#{${'voucher.status.' + #strings.toLowerCase(tour.status)}}"></td>
+                    <td><span th:text="${tour.isHot} ? #{common.yes} : #{common.no}"></span></td>
                     <td>
                         <form th:action="@{/manager/vouchers/{id}/status(id=${tour.id})}" method="post" class="d-inline-block me-2">
                             <select name="status" class="form-select form-select-sm d-inline w-auto">
-                                <option value="PAID">Paid</option>
-                                <option value="CANCELED">Canceled</option>
+                                <option value="PAID" th:text="#{voucher.status.paid}">Paid</option>
+                                <option value="CANCELED" th:text="#{voucher.status.canceled}">Canceled</option>
                             </select>
-                            <button type="submit" class="btn btn-sm btn-info">Update</button>
+                            <button type="submit" class="btn btn-sm btn-info" th:text="#{button.update}">Update</button>
                         </form>
                         <form th:action="@{/manager/vouchers/{id}/hot(id=${tour.id})}" method="post" class="d-inline-block">
                             <input type="hidden" name="isHot" th:value="${!tour.isHot}"/>
-                            <button type="submit" class="btn btn-sm"
-                                    th:classappend="${tour.isHot} ? 'btn-secondary' : 'btn-warning'"
-                                    th:text="${tour.isHot} ? 'Remove Hot' : 'Set as Hot'">
-                            </button>
+                            <button type="submit" class="btn btn-sm" th:classappend="${tour.isHot} ? 'btn-secondary' : 'btn-warning'" th:text="${tour.isHot} ? #{button.remove_hot} : #{button.set_hot}"></button>
                         </form>
                     </td>
                 </tr>

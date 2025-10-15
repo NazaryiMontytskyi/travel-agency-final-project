@@ -15,19 +15,23 @@ import java.util.Arrays;
 public class LoggingAspect {
 
     @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
-    public void controllerLayer() {
+    public void restControllerLayer() {
     }
 
+    @Pointcut("within(@org.springframework.stereotype.Controller *) && within(com.epam.finaltask.controllers..*)")
+    public void mvcControllerLayer() {
+    }
 
     @Pointcut("within(com.epam.finaltask.service..*)")
     public void serviceLayer() {
     }
 
-    @Pointcut("(within(com.epam.finaltask.auth..*) || within(com.epam.finaltask.token..*)) && !within(com.epam.finaltask.token.JwtAuthenticationFilter)")
+    @Pointcut("(within(com.epam.finaltask.auth..*) || within(com.epam.finaltask.token..*)) && " +
+            "!within(com.epam.finaltask.token.JwtAuthenticationFilter)")
     public void securityLayer() {
     }
 
-    @Pointcut("controllerLayer() || serviceLayer() || securityLayer()")
+    @Pointcut("restControllerLayer() || mvcControllerLayer() || serviceLayer() || securityLayer()")
     public void applicationLayers() {
     }
 
@@ -66,7 +70,7 @@ public class LoggingAspect {
         final StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        Object result = joinPoint.proceed(); // Виконання самого методу
+        Object result = joinPoint.proceed(); 
 
         stopWatch.stop();
 

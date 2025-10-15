@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,9 +62,15 @@ class VoucherServiceImplTest {
 
     @Test
     void order_ShouldAssignVoucherToUser() {
+        voucher.setPrice(1000.0);
+        user.setBalance(new BigDecimal("2000.0"));
+
         when(voucherRepository.findById(any())).thenReturn(Optional.of(voucher));
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(voucherMapper.toVoucherDTO(any())).thenReturn(dto);
+        when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
 
         VoucherDTO result = voucherService.order(voucher.getId().toString(), user.getId().toString());
 
@@ -77,7 +84,7 @@ class VoucherServiceImplTest {
     void order_ShouldThrow_WhenVoucherAlreadyHasUser() {
         voucher.setUser(new User());
         when(voucherRepository.findById(any())).thenReturn(Optional.of(voucher));
-
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
         assertThrows(IllegalStateException.class,
                 () -> voucherService.order(voucher.getId().toString(), user.getId().toString()));
     }

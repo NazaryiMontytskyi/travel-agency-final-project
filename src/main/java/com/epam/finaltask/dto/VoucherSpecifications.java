@@ -10,6 +10,15 @@ import java.math.BigDecimal;
 
 public class VoucherSpecifications {
 
+    public static Specification<Voucher> titleContains(String title) {
+        return (root, query, cb) -> {
+            if (title == null || title.isEmpty()) {
+                return cb.conjunction();
+            }
+            return cb.like(cb.lower(root.get("title")), "%" + title.toLowerCase() + "%");
+        };
+    }
+
     public static Specification<Voucher> hasHotelType(String hotelType) {
         return (root, query, cb) -> {
             if (hotelType == null || hotelType.isEmpty()) return cb.conjunction();

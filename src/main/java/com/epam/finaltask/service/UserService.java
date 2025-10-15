@@ -21,4 +21,5 @@ public interface UserService {
     Optional<UserDTO> changePassword(String id, ChangePasswordRequest newPassword);
     List<UserDTO> findAll();
     void updateUserBalance(String username, Double amountChange);
+    Optional<UserDTO> changeUserRole(String id, String role);
 }

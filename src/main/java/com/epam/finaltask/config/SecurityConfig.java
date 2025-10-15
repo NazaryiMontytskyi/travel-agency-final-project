@@ -48,7 +48,7 @@ public class SecurityConfig {
     public SecurityFilterChain mvcSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/tours/**", "/search", "/css/**", "/js/**", "/error", "/images/**").permitAll()
+                        .requestMatchers("/", "/error", "/register", "/login", "/css/**", "/js/**", "/images/**", "/tours/**").permitAll()
                         .requestMatchers("/login", "/register").permitAll()
                         .requestMatchers("/order/**", "/payment/**", "/account").authenticated()
                         .requestMatchers("/manager/**").hasAuthority("manager:update")

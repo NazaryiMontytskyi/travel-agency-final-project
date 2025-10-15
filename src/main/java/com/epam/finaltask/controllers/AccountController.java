@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -59,34 +60,49 @@ public class AccountController {
     public String updateUserProfile(@Valid @ModelAttribute("user") UserDTO userDTO,
                                     BindingResult bindingResult,
                                     Principal principal,
+                                    RedirectAttributes redirectAttributes,
                                     Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("passwordRequest", new ChangePasswordRequest("", ""));
             return "edit-profile";
         }
-        userService.updateUser(principal.getName(), userDTO);
-        return "redirect:/account?profile_updated";
+
+        String oldUsername = principal.getName();
+        String newUsername = userDTO.getUsername();
+
+        userService.updateUser(oldUsername, userDTO);
+
+        if (!newUsername.equals(oldUsername)) {
+            redirectAttributes.addFlashAttribute("successMessage", "Username changed successfully! Please log in again.");
+            return "redirect:/logout";
+        } else {
+            redirectAttributes.addFlashAttribute("profileUpdateSuccess", "Your profile has been updated successfully.");
+            return "redirect:/account";
+        }
     }
+
 
     @PostMapping("/account/change-password")
     @PreAuthorize("isAuthenticated()")
     public String changePassword(@Valid @ModelAttribute("passwordRequest") ChangePasswordRequest passwordRequest,
                                  BindingResult bindingResult,
                                  Principal principal,
-                                 RedirectAttributes redirectAttributes,
-                                 Model model) {
+                                 RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordRequest", bindingResult);
             redirectAttributes.addFlashAttribute("passwordRequest", passwordRequest);
             return "redirect:/account/edit";
         }
-        try {
-            UserDTO user = userService.getUserByUsername(principal.getName());
-            userService.changePassword(user.getId(), passwordRequest);
+
+        UserDTO user = userService.getUserByUsername(principal.getName());
+
+        Optional<UserDTO> result = userService.changePassword(user.getId(), passwordRequest);
+
+        if (result.isPresent()) {
             redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully! Please log in again.");
             return "redirect:/logout";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("passwordError", "Error changing password: " + e.getMessage());
+        } else {
+            redirectAttributes.addFlashAttribute("passwordError", "Incorrect old password. Please try again.");
             return "redirect:/account/edit";
         }
     }

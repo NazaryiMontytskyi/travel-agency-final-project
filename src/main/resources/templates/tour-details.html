@@ -7,15 +7,55 @@
 <body>
 <div th:replace="~{layout :: header}"></div>
 <main class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h2 th:text="${tour.title}">Tour Title</h2>
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0" th:text="${tour.title}">Tour Title</h2>
+            <img th:if="${tour.isHot}" th:src="@{/images/fire-icon.png}" alt="Hot Tour" style="width: 30px; height: 30px;"/>
         </div>
         <div class="card-body">
-            <p><strong th:text="#{tour.description}">Description:</strong> <span th:text="${tour.description}"></span></p>
-            <p><strong th:text="#{tour.price}">Price:</strong> <span th:text="${tour.price}"></span></p>
-            <a th:href="@{/order/{id}(id=${tour.id})}" class="btn btn-success btn-lg"
-               sec:authorize="isAuthenticated()" th:text="#{button.order}">Order Tour</a>
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 th:text="#{tour.description}">Description</h4>
+                    <p th:text="${tour.description}">Full tour description goes here.</p>
+                </div>
+                <div class="col-md-4">
+                    <h4 th:text="#{section.title.details}">Details</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <strong th:text="#{tour.price} + ':'">Price:</strong>
+                            <span class="badge bg-primary rounded-pill fs-6" th:text="${#numbers.formatCurrency(tour.price)}"></span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong th:text="#{tour.details.tourType} + ':'"></strong>
+                            <span th:text="#{${'tour.type.' + #strings.toLowerCase(tour.tourType)}}"></span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong th:text="#{tour.details.transferType} + ':'"></strong>
+                            <span th:text="#{${'transfer.type.' + #strings.toLowerCase(tour.transferType)}}"></span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong th:text="#{tour.details.hotelType} + ':'"></strong>
+                            <span th:text="#{${'hotel.type.' + #strings.toLowerCase(tour.hotelType)}}"></span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong th:text="#{tour.details.arrivalDate} + ':'"></strong>
+                            <span th:text="${#temporals.format(tour.arrivalDate, 'dd MMM yyyy')}"></span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong th:text="#{tour.details.evictionDate} + ':'"></strong>
+                            <span th:text="${#temporals.format(tour.evictionDate, 'dd MMM yyyy')}"></span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong th:text="#{tour.details.isHot} + ':'"></strong>
+                            <span class="badge" th:classappend="${tour.isHot} ? 'bg-danger' : 'bg-secondary'" th:text="${tour.isHot} ? #{common.yes} : #{common.no}"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <a th:href="@{/order/{id}(id=${tour.id})}" class="btn btn-success btn-lg" sec:authorize="isAuthenticated()" th:text="#{button.order}"></a>
+            <div sec:authorize="!isAuthenticated()" class="alert alert-info mt-3" th:utext="#{text.login_to_order_full}"></div>
         </div>
     </div>
 </main>

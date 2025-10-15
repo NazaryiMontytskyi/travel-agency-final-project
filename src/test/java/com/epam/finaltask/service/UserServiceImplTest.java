@@ -98,14 +98,23 @@ class UserServiceImplTest {
     @Test
     void changePassword_ShouldUpdatePassword_WhenOldPasswordMatches() {
         ChangePasswordRequest req = new ChangePasswordRequest("old", "new");
+        String initialEncodedPassword = "encodedPass";
+        String newEncodedPassword = "encodedNew";
+
+        user.setPassword(initialEncodedPassword);
+
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode("old")).thenReturn("encodedPass");
-        when(passwordEncoder.encode("new")).thenReturn("encodedNew");
+
+        when(passwordEncoder.matches(req.oldPassword(), initialEncodedPassword)).thenReturn(true);
+
+        when(passwordEncoder.encode(req.newPassword())).thenReturn(newEncodedPassword);
+
         when(userMapper.toUserDTO(any())).thenReturn(userDTO);
 
         var result = userService.changePassword(user.getId().toString(), req);
 
         assertTrue(result.isPresent());
+
         verify(userRepository).save(user);
     }
 }

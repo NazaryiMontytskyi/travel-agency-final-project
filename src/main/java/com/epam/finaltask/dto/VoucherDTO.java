@@ -1,12 +1,14 @@
 package com.epam.finaltask.dto;
 
-import jakarta.validation.constraints.FutureOrPresent;
+import com.epam.finaltask.model.VoucherStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -21,8 +23,10 @@ public class VoucherDTO {
 
     @NotNull
     @NotBlank(message = "Title can't be blank")
+    @Size(min = 5, max = 30, message = "Title can't be shorter than 5 and longer than 30 characters")
     private String title;
 
+    @Size(min = 10, max = 300, message = "Description is limited from 10 to 300 characters")
     private String description;
 
     @NotNull
@@ -38,14 +42,14 @@ public class VoucherDTO {
     private String hotelType;
 
     @NotNull
-    private String status;
+    private String status = VoucherStatus.REGISTERED.name();
 
     @NotNull(message = "Arrival date must be present")
-    @FutureOrPresent(message = "Arrival date can't be in the past")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate arrivalDate;
 
     @NotNull
-    @FutureOrPresent(message = "Eviction date can't be in the past")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate evictionDate;
 
     private UUID userId;

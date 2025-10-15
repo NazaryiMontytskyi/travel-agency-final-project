@@ -8,37 +8,34 @@
 <div th:replace="~{layout :: header}"></div>
 <main class="container mt-4">
     <div th:if="${paymentSuccess}" class="alert alert-success" th:text="${paymentSuccess}"></div>
-
-    <!-- src/main/resources/templates/index.html -->
     <div class="card mb-4">
         <div class="card-body">
             <form th:action="@{/}" method="get" class="row g-3" th:object="${searchParams}">
-                <!-- Tour Type -->
+                <div class="col-md-12">
+                    <input type="text" class="form-control" th:placeholder="#{label.search.title}" th:field="*{title}">
+                </div>
                 <div class="col-md-3">
                     <select class="form-select" th:field="*{tourType}">
-                        <option value="" th:text="#{tour.type} + '...'">Tour Type...</option>
-                        <option th:each="type : ${tourTypes}" th:value="${type}" th:text="${type}"></option>
+                        <option value="" th:text="#{tour.type} + '...'"></option>
+                        <option th:each="type : ${tourTypes}" th:value="${type}" th:text="#{${'tour.type.' + #strings.toLowerCase(type.name())}}"></option>
                     </select>
                 </div>
-                <!-- Transfer Type -->
                 <div class="col-md-3">
                     <select class="form-select" th:field="*{transferType}">
-                        <option value="" th:text="#{tour.transfer} + '...'">Transfer Type...</option>
-                        <option th:each="type : ${transferTypes}" th:value="${type}" th:text="${type}"></option>
+                        <option value="" th:text="#{tour.transfer} + '...'"></option>
+                        <option th:each="type : ${transferTypes}" th:value="${type}" th:text="#{${'transfer.type.' + #strings.toLowerCase(type.name())}}"></option>
                     </select>
                 </div>
-                <!-- Hotel Type -->
                 <div class="col-md-3">
                     <select class="form-select" th:field="*{hotelType}">
-                        <option value="" th:text="#{tour.hotel} + '...'">Hotel Type...</option>
-                        <option th:each="type : ${hotelTypes}" th:value="${type}" th:text="${type}"></option>
+                        <option value="" th:text="#{tour.hotel} + '...'"></option>
+                        <option th:each="type : ${hotelTypes}" th:value="${type}" th:text="#{${'hotel.type.' + #strings.toLowerCase(type.name())}}"></option>
                     </select>
                 </div>
-                <!-- Price Range -->
                 <div class="col-md-3">
                     <div class="input-group">
-                        <input type="number" class="form-control" placeholder="Min Price" th:field="*{priceMin}">
-                        <input type="number" class="form-control" placeholder="Max Price" th:field="*{priceMax}">
+                        <input type="number" class="form-control" th:placeholder="#{placeholder.min_price}" th:field="*{priceMin}">
+                        <input type="number" class="form-control" th:placeholder="#{placeholder.max_price}" th:field="*{priceMax}">
                     </div>
                 </div>
                 <div class="col-12">
@@ -47,57 +44,31 @@
             </form>
         </div>
     </div>
-
     <h2 class="mb-4" th:text="#{tour.catalogue}">Tour Catalogue</h2>
     <div th:if="${tourPage != null and !tourPage.isEmpty()}">
         <div class="row">
             <div class="col-md-4 mb-4" th:each="tour : ${tourPage.content}">
                 <div class="card h-100 shadow-sm position-relative">
-
-                    <div th:if="${tour.isHot}">
-                        <img th:src="@{/images/fire-icon.png}" alt="Hot Tour" class="card-hot-icon"/>
-                    </div>
-
-                    <img th:src="'https://placehold.co/600x400/E0E0E0/AAAAAA?text=' + ${tour.title}"
-                         class="card-img-top"
-                         alt="Tour Image Placeholder">
-
+                    <div th:if="${tour.isHot}"><img th:src="@{/images/fire-icon.png}" alt="Hot Tour" class="card-hot-icon"/></div>
+                    <img th:src="'https://placehold.co/600x400/E0E0E0/AAAAAA?text=' + ${tour.title}" class="card-img-top" alt="Tour Image Placeholder">
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title" th:text="${tour.title}">Tour Title</h5>
-                        <p class="card-text text-muted small" th:text="${#strings.abbreviate(tour.description, 100)}">
-                            Short tour description...
-                        </p>
-                        <p class="card-text fs-5 fw-bold">
-                            <span th:text="${#numbers.formatDecimal(tour.price, 1, 'COMMA', 2, 'POINT')} + ' $'"></span>
-                        </p>
-
-                        <div class="mt-auto text-center">
-                            <a th:href="@{/tours/{id}(id=${tour.id})}" class="btn btn-outline-primary w-100" th:text="#{button.details}">
-                                See the tour
-                            </a>
-                        </div>
+                        <h5 class="card-title" th:text="${tour.title}"></h5>
+                        <p class="card-text text-muted small" th:text="${#strings.abbreviate(tour.description, 100)}" th:placeholder="#{text.short_tour_description}"></p>
+                        <p class="card-text fs-5 fw-bold"><span th:text="${#numbers.formatCurrency(tour.price)}"></span></p>
+                        <div class="mt-auto text-center"><a th:href="@{/tours/{id}(id=${tour.id})}" class="btn btn-outline-primary w-100" th:text="#{button.details}"></a></div>
                     </div>
                 </div>
             </div>
         </div>
-
         <nav aria-label="Page navigation" th:if="${tourPage.totalPages > 1}">
             <ul class="pagination justify-content-center">
-                <li class="page-item" th:classappend="${tourPage.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/(page=${tourPage.number}, keyword=${keyword})}">Previous</a>
-                </li>
-                <li class="page-item" th:each="i : ${pageNumbers}" th:classappend="${i == tourPage.number + 1} ? 'active'">
-                    <a class="page-link" th:href="@{/(page=${i}, keyword=${keyword})}" th:text="${i}"></a>
-                </li>
-                <li class="page-item" th:classappend="${tourPage.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/(page=${tourPage.number + 2}, keyword=${keyword})}">Next</a>
-                </li>
+                <li class="page-item" th:classappend="${tourPage.first} ? 'disabled'"><a class="page-link" th:href="@{/(page=${tourPage.number}, ...)}" th:text="#{pagination.previous}"></a></li>
+                <li class="page-item" th:each="i : ${pageNumbers}" th:classappend="${i == tourPage.number + 1} ? 'active'"><a class="page-link" th:href="@{/(page=${i}, ...)}" th:text="${i}"></a></li>
+                <li class="page-item" th:classappend="${tourPage.last} ? 'disabled'"><a class="page-link" th:href="@{/(page=${tourPage.number + 2}, ...)}" th:text="#{pagination.next}"></a></li>
             </ul>
         </nav>
     </div>
-    <div th:if="${tourPage == null or tourPage.isEmpty()}" class="alert alert-info">
-        <p>No tours found.</p>
-    </div>
+    <div th:if="${tourPage == null or tourPage.isEmpty()}" class="alert alert-info"><p th:text="#{message.info.no_tours}"></p></div>
 </main>
 <div th:replace="~{layout :: footer}"></div>
 </body>

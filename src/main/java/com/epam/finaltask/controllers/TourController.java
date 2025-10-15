@@ -44,14 +44,15 @@ public class TourController {
 
             if (currentUser.getBalance() < voucher.getPrice()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Insufficient funds to order this tour. Please top up your balance.");
-                return "redirect:/tours/" + id;
+                return "redirect:/order/" + id;
             }
 
             voucherService.order(id, currentUser.getId());
             return "redirect:/payment/" + id;
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to order tour: " + e.getMessage());
-            return "redirect:/tours/" + id;
+            return "redirect:/order/" + id;
         }
     }
 }

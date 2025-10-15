@@ -12,7 +12,7 @@ public class VoucherMapperImpl implements VoucherMapper {
     @Override
     public Voucher toVoucher(VoucherDTO voucherDTO) {
         return Voucher.builder()
-                .id(UUID.fromString(voucherDTO.getId()))
+                .id(voucherDTO.getId() != null ? UUID.fromString(voucherDTO.getId()) : null)
                 .title(voucherDTO.getTitle())
                 .description(voucherDTO.getDescription())
                 .price(voucherDTO.getPrice())
@@ -22,7 +22,7 @@ public class VoucherMapperImpl implements VoucherMapper {
                 .status(VoucherStatus.valueOf(voucherDTO.getStatus()))
                 .arrivalDate(voucherDTO.getArrivalDate())
                 .evictionDate(voucherDTO.getEvictionDate())
-                .user(User.builder().id(voucherDTO.getUserId()).build())
+                .user(voucherDTO.getUserId() != null ? User.builder().id(voucherDTO.getUserId()).build() : null)
                 .isHot(voucherDTO.getIsHot())
                 .build();
 

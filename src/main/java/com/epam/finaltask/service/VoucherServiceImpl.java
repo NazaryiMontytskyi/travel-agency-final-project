@@ -39,8 +39,11 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     @Transactional
     public VoucherDTO order(String id, String userId) {
-        Voucher voucherToOrder = voucherRepository.findById(UUID.fromString(id)).orElseThrow(/*...*/);
-        User user = userRepository.findById(UUID.fromString(userId)).orElseThrow(/*...*/);
+        Voucher voucherToOrder = voucherRepository.findById(UUID.fromString(id)).orElseThrow();
+        if (voucherToOrder.getUser() != null) {
+            throw new IllegalStateException("Voucher is already assigned to another user.");
+        }
+        User user = userRepository.findById(UUID.fromString(userId)).orElseThrow();
 
         BigDecimal price = BigDecimal.valueOf(voucherToOrder.getPrice());
         if (user.getBalance().compareTo(price) < 0) {
@@ -49,7 +52,7 @@ public class VoucherServiceImpl implements VoucherService {
         user.setBalance(user.getBalance().subtract(price));
 
         voucherToOrder.setUser(user);
-        voucherToOrder.setStatus(VoucherStatus.REGISTERED);
+        voucherToOrder.setStatus(VoucherStatus.PAID);
 
         userRepository.save(user);
         return voucherMapper.toVoucherDTO(voucherRepository.save(voucherToOrder));
@@ -78,54 +81,81 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public VoucherDTO update(String id, VoucherDTO voucherDTO) {
-        var voucher = this.voucherRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new IllegalArgumentException("No voucher found with such an id"));
+        Voucher voucher = this.voucherRepository.findById(UUID.fromString(id))
+                .orElseThrow(() -> new IllegalArgumentException("No voucher found with such an id: " + id));
 
-        voucher.setTitle(compareAndChoose(voucherDTO.getTitle(), voucher.getTitle()));
-        voucher.setDescription(compareAndChoose(voucherDTO.getDescription(), voucher.getDescription()));
-        voucher.setPrice(compareAndChoose(voucherDTO.getPrice(), voucher.getPrice()));
-        voucher.setArrivalDate(compareAndChoose(voucherDTO.getArrivalDate(), voucher.getArrivalDate()));
-        voucher.setEvictionDate(compareAndChoose(voucherDTO.getEvictionDate(), voucher.getEvictionDate()));
+        voucher.setTitle(voucherDTO.getTitle());
+        voucher.setDescription(voucherDTO.getDescription());
+        voucher.setPrice(voucherDTO.getPrice());
+        voucher.setArrivalDate(voucherDTO.getArrivalDate());
+        voucher.setEvictionDate(voucherDTO.getEvictionDate());
+        voucher.setHot(voucherDTO.getIsHot() != null && voucherDTO.getIsHot());
 
-        voucher.setTourType(safeEnumValue(voucherDTO.getTourType(), TourType.class));
-        voucher.setTransferType(safeEnumValue(voucherDTO.getTransferType(), TransferType.class));
-        voucher.setHotelType(safeEnumValue(voucherDTO.getHotelType(), HotelType.class));
-        voucher.setStatus(safeEnumValue(voucherDTO.getStatus(), VoucherStatus.class));
-
-        User user = null;
-        if (voucherDTO.getUserId() != null) {
-            user = this.userRepository.findById(voucherDTO.getUserId()).orElse(null);
+        if (voucherDTO.getTourType() != null) {
+            voucher.setTourType(TourType.valueOf(voucherDTO.getTourType()));
         }
-        voucher.setUser(user);
-
-        voucher.setHot(voucherDTO.getIsHot());
-
-        this.voucherRepository.save(voucher);
-
-        if (user != null) {
-            if (!user.getVouchers().contains(voucher)) {
-                user.getVouchers().add(voucher);
-                userRepository.save(user);
-            }
+        if (voucherDTO.getTransferType() != null) {
+            voucher.setTransferType(TransferType.valueOf(voucherDTO.getTransferType()));
+        }
+        if (voucherDTO.getHotelType() != null) {
+            voucher.setHotelType(HotelType.valueOf(voucherDTO.getHotelType()));
         }
 
-        return voucherMapper.toVoucherDTO(voucher);
+        Voucher updatedVoucher = this.voucherRepository.save(voucher);
+
+        return voucherMapper.toVoucherDTO(updatedVoucher);
     }
 
-    private <T> T compareAndChoose(T newValue, T oldValue) {
-        if(newValue == null){
-            return oldValue;
-        }
-        if(oldValue == null){
-            return newValue;
-        }
-        return newValue.equals(oldValue) ? oldValue : newValue;
-    }
-
-    private <E extends Enum<E>> E safeEnumValue(String value, Class<E> enumClass) {
-        if (value == null) return null;
-        return Enum.valueOf(enumClass, value);
-    }
+//    @Override
+//    public VoucherDTO update(String id, VoucherDTO voucherDTO) {
+//        var voucher = this.voucherRepository.findById(UUID.fromString(id))
+//                .orElseThrow(() -> new IllegalArgumentException("No voucher found with such an id"));
+//
+//        voucher.setTitle(compareAndChoose(voucherDTO.getTitle(), voucher.getTitle()));
+//        voucher.setDescription(compareAndChoose(voucherDTO.getDescription(), voucher.getDescription()));
+//        voucher.setPrice(compareAndChoose(voucherDTO.getPrice(), voucher.getPrice()));
+//        voucher.setArrivalDate(compareAndChoose(voucherDTO.getArrivalDate(), voucher.getArrivalDate()));
+//        voucher.setEvictionDate(compareAndChoose(voucherDTO.getEvictionDate(), voucher.getEvictionDate()));
+//
+//        voucher.setTourType(safeEnumValue(voucherDTO.getTourType(), TourType.class));
+//        voucher.setTransferType(safeEnumValue(voucherDTO.getTransferType(), TransferType.class));
+//        voucher.setHotelType(safeEnumValue(voucherDTO.getHotelType(), HotelType.class));
+//        voucher.setStatus(safeEnumValue(voucherDTO.getStatus(), VoucherStatus.class));
+//
+//        User user = null;
+//        if (voucherDTO.getUserId() != null) {
+//            user = this.userRepository.findById(voucherDTO.getUserId()).orElse(null);
+//        }
+//        voucher.setUser(user);
+//
+//        voucher.setHot(voucherDTO.getIsHot());
+//
+//        this.voucherRepository.save(voucher);
+//
+//        if (user != null) {
+//            if (!user.getVouchers().contains(voucher)) {
+//                user.getVouchers().add(voucher);
+//                userRepository.save(user);
+//            }
+//        }
+//
+//        return voucherMapper.toVoucherDTO(voucher);
+//    }
+//
+//    private <T> T compareAndChoose(T newValue, T oldValue) {
+//        if(newValue == null){
+//            return oldValue;
+//        }
+//        if(oldValue == null){
+//            return newValue;
+//        }
+//        return newValue.equals(oldValue) ? oldValue : newValue;
+//    }
+//
+//    private <E extends Enum<E>> E safeEnumValue(String value, Class<E> enumClass) {
+//        if (value == null) return null;
+//        return Enum.valueOf(enumClass, value);
+//    }
 
 
 
@@ -188,6 +218,10 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public List<VoucherDTO> findAllByParameters(Pageable pageable, VoucherSearchParameters parameters) {
         Specification<Voucher> spec = Specification.where(null);
+
+        if (parameters.title() != null && !parameters.title().isEmpty()) {
+            spec = spec.and(VoucherSpecifications.titleContains(parameters.title()));
+        }
 
         if (parameters.hotelType() != null && !parameters.hotelType().isEmpty()) {
             spec = spec.and(VoucherSpecifications.hasHotelType(parameters.hotelType()));

@@ -1,41 +1,51 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Edit Profile</title>
+    <title th:text="#{page.title.edit_profile}">Edit Profile</title>
     <th:block th:insert="~{layout :: head}"></th:block>
 </head>
 <body>
 <div th:replace="~{layout :: header}"></div>
 <main class="container mt-4">
-    <h2>Edit Profile</h2>
-    <form th:action="@{/account/edit}" th:object="${user}" method="post">
-        <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" id="username" class="form-control" th:field="*{username}" required>
+    <div class="col-md-8 mx-auto">
+        <h2 class="mb-4" th:text="#{page.title.edit_profile}">Edit Profile</h2>
+        <div th:if="${profileUpdateSuccess}" class="alert alert-success" th:text="${profileUpdateSuccess}"></div>
+        <div class="card mb-4">
+            <div class="card-header"><h4 th:text="#{section.title.profile_info}">Profile Information</h4></div>
+            <div class="card-body">
+                <form th:action="@{/account/edit}" th:object="${user}" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label" th:text="#{label.email}">Username (Email)</label>
+                        <input type="text" id="username" class="form-control" th:field="*{username}" required>
+                        <div class="form-text" th:text="#{text.username_change_warning}">If you change your username, you will be logged out...</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label" th:text="#{label.phone_number}">Phone Number</label>
+                        <input type="tel" id="phoneNumber" class="form-control" th:field="*{phoneNumber}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" th:text="#{button.save}">Save Changes</button>
+                    <a th:href="@{/account}" class="btn btn-secondary" th:text="#{button.cancel}">Cancel</a>
+                </form>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="phoneNumber" class="form-label">Phone Number</label>
-            <input type="tel" id="phoneNumber" class="form-control" th:field="*{phoneNumber}" required>
+        <div class="card">
+            <div class="card-header"><h4 th:text="#{section.title.change_password}">Change Password</h4></div>
+            <div class="card-body">
+                <div th:if="${passwordError}" class="alert alert-danger" th:text="${passwordError}"></div>
+                <form th:action="@{/account/change-password}" method="post" th:object="${passwordRequest}">
+                    <div class="mb-3">
+                        <label for="oldPassword" class="form-label" th:text="#{label.password.old}">Old Password</label>
+                        <input type="password" id="oldPassword" class="form-control" th:field="*{oldPassword}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label" th:text="#{label.password.new}">New Password</label>
+                        <input type="password" id="newPassword" class="form-control" th:field="*{newPassword}" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning" th:text="#{button.change_password}">Change Password</button>
+                </form>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
-
-    <hr class="my-4">
-
-    <h2>Change Password</h2>
-    <div th:if="${passwordError}" class="alert alert-danger" th:text="${passwordError}"></div>
-
-    <form th:action="@{/account/change-password}" method="post" th:object="${passwordRequest}">
-        <div class="mb-3">
-            <label for="oldPassword" class="form-label">Old Password</label>
-            <input type="password" id="oldPassword" class="form-control" th:field="*{oldPassword}" required>
-        </div>
-        <div class="mb-3">
-            <label for="newPassword" class="form-label">New Password</label>
-            <input type="password" id="newPassword" class="form-control" th:field="*{newPassword}" required>
-        </div>
-        <button type="submit" class="btn btn-warning">Change Password</button>
-    </form>
+    </div>
 </main>
 <div th:replace="~{layout :: footer}"></div>
 </body>

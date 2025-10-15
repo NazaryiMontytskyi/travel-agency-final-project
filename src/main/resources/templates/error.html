@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Oops! Something went wrong</title>
+    <title th:text="#{page.title.error}">Oops! Something went wrong</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -25,15 +25,10 @@
 <body>
 <div class="error-container">
     <img th:src="@{/images/error-panda.png}" alt="Server Error" class="error-image mb-4"/>
-
     <h1 th:text="${errorMessage}">Error</h1>
-    <h1 th:unless="${statusCode != null}">An Error Occurred</h1>
-
-    <p class="lead">Looks like this page took a nap. Let's go back home.</p>
-
-    <a th:href="@{/}" class="btn btn-primary btn-lg mt-3">
-        Go to Home Page
-    </a>
+    <h1 th:unless="${statusCode != null}" th:text="#{text.error.an_error_occurred}">An Error Occurred</h1>
+    <p class="lead" th:text="#{text.error.page_took_a_nap}">Looks like this page took a nap...</p>
+    <a th:href="@{/}" class="btn btn-primary btn-lg mt-3" th:text="#{button.go_home}">Go to Home Page</a>
 </div>
 </body>
 </html>

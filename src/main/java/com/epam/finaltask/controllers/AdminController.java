@@ -1,10 +1,7 @@
 package com.epam.finaltask.controllers;
 
 import com.epam.finaltask.dto.VoucherDTO;
-import com.epam.finaltask.model.HotelType;
-import com.epam.finaltask.model.TourType;
-import com.epam.finaltask.model.TransferType;
-import com.epam.finaltask.model.VoucherStatus;
+import com.epam.finaltask.model.*;
 import com.epam.finaltask.service.UserService;
 import com.epam.finaltask.service.VoucherService;
 import jakarta.validation.Valid;
@@ -32,6 +29,7 @@ public class AdminController {
         var currentUser = this.userService.getUserByUsername(principal.getName());
         model.addAttribute("allUsers", userService.findAll());
         model.addAttribute("allTours", voucherService.findAll());
+        model.addAttribute("allRoles", Role.values());
         model.addAttribute("user", currentUser);
         return "admin-panel";
     }
@@ -55,15 +53,25 @@ public class AdminController {
             return "redirect:/admin/panel?error=Voucher is already booked";
         }
         model.addAttribute("voucher", voucher);
+        model.addAttribute("tourTypes", TourType.values());
+        model.addAttribute("transferTypes", TransferType.values());
+        model.addAttribute("hotelTypes", HotelType.values());
         return "edit-voucher";
     }
 
     @PostMapping("/vouchers/{id}/edit")
-    public String updateVoucher(@PathVariable String id, @Valid @ModelAttribute("voucher") VoucherDTO voucherDTO,
-                                BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String updateVoucher(@PathVariable String id,
+                                @Valid @ModelAttribute("voucher") VoucherDTO voucherDTO,
+                                BindingResult bindingResult,
+                                RedirectAttributes redirectAttributes,
+                                Model model) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("tourTypes", TourType.values());
+            model.addAttribute("transferTypes", TransferType.values());
+            model.addAttribute("hotelTypes", HotelType.values());
             return "edit-voucher";
         }
+
         voucherService.update(id, voucherDTO);
         redirectAttributes.addFlashAttribute("successMessage", "Voucher updated successfully!");
         return "redirect:/admin/panel";
@@ -80,7 +88,9 @@ public class AdminController {
     @GetMapping("/vouchers/new")
     @PreAuthorize("hasAuthority('admin:create')")
     public String showCreateVoucherForm(Model model) {
-        model.addAttribute("voucher", new VoucherDTO());
+        VoucherDTO voucher = new VoucherDTO();
+        voucher.setIsHot(false);
+        model.addAttribute("voucher", voucher);
         model.addAttribute("tourTypes", TourType.values());
         model.addAttribute("transferTypes", TransferType.values());
         model.addAttribute("hotelTypes", HotelType.values());
@@ -90,14 +100,25 @@ public class AdminController {
     @PostMapping("/vouchers/new")
     @PreAuthorize("hasAuthority('admin:create')")
     public String createVoucher(@Valid @ModelAttribute("voucher") VoucherDTO voucherDTO,
-                                BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+                                BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("tourTypes", TourType.values());
+            model.addAttribute("transferTypes", TransferType.values());
+            model.addAttribute("hotelTypes", HotelType.values());
             return "create-voucher";
         }
         voucherDTO.setStatus(VoucherStatus.REGISTERED.name());
         voucherDTO.setIsHot(false);
         voucherService.create(voucherDTO);
         redirectAttributes.addFlashAttribute("successMessage", "Voucher created successfully!");
+        return "redirect:/admin/panel";
+    }
+
+    @PostMapping("/users/{id}/change-role")
+    @PreAuthorize("hasAuthority('admin:update')")
+    public String changeUserRole(@PathVariable String id, @RequestParam("role") String role, RedirectAttributes redirectAttributes) {
+        userService.changeUserRole(id, role);
+        redirectAttributes.addFlashAttribute("successMessage", "User role updated successfully!");
         return "redirect:/admin/panel";
     }
 }
