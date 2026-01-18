@@ -29,17 +29,28 @@ public class UserMapperImpl implements UserMapper {
             }
         }
 
+        Role role = Role.USER;
+        if (userDTO.getRole() != null && !userDTO.getRole().isEmpty()) {
+            try {
+                role = Role.valueOf(userDTO.getRole());
+            } catch (IllegalArgumentException e) {
+            }
+        }
+
         return User.builder()
                 .id(userId)
-                .username(userDTO.getUsername())
-                .password(userDTO.getPassword())
-                .role(Role.fromString(userDTO.getRole()))
+                .username(Optional.ofNullable(userDTO.getUsername()).orElse(""))
+                .password(Optional.ofNullable(userDTO.getPassword()).orElse(""))
+                .role(role)
                 .vouchers(Optional.ofNullable(userDTO.getVouchers()).orElse(Collections.emptyList()))
-                .phoneNumber(userDTO.getPhoneNumber())
-                .balance(Optional.of(BigDecimal.valueOf(userDTO.getBalance())).orElse(BigDecimal.valueOf(0.0)))
+                .phoneNumber(Optional.ofNullable(userDTO.getPhoneNumber()).orElse(""))
+                .balance(Optional.ofNullable(userDTO.getBalance())
+                        .map(BigDecimal::valueOf)
+                        .orElse(BigDecimal.ZERO))
                 .active(userDTO.isActive())
                 .build();
     }
+
 
     @Override
     public UserDTO toUserDTO(User user) {
@@ -49,6 +60,7 @@ public class UserMapperImpl implements UserMapper {
 
         return UserDTO.builder()
                 .id(user.getId() != null ? user.getId().toString() : null)
+                .password(user.getPassword())
                 .username(user.getUsername())
                 .role(user.getRole() != null ? user.getRole().toString() : null)
                 .vouchers(Optional.ofNullable(user.getVouchers()).orElse(Collections.emptyList()))
@@ -57,4 +69,5 @@ public class UserMapperImpl implements UserMapper {
                 .active(user.isActive())
                 .build();
     }
+
 }

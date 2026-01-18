@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{page.title.payment}">Payment</title>
+    <th:block th:insert="~{layout :: head}"></th:block>
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main class="container mt-4 d-flex justify-content-center">
+    <div class="col-md-6">
+        <h2 th:text="#{text.payment_for} + ' ' + ${tour.title}"></h2>
+        <h4 class="mb-4" th:text="#{text.total} + ': ' + ${#numbers.formatCurrency(tour.price)}"></h4>
+        <div class="credit-card-box shadow-lg">
+            <form th:action="@{/payment/{id}(id=${tour.id})}" method="post">
+                <div class="mb-3">
+                    <label for="cardNumber" class="form-label" th:text="#{label.card_number}">Card Number</label>
+                    <input type="text" id="cardNumber" class="form-control form-control-dark card-number" th:placeholder="#{placeholder.card_number}" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label for="cardHolder" class="form-label" th:text="#{label.card_holder}">Card Holder</label>
+                        <input type="text" id="cardHolder" class="form-control form-control-dark" th:placeholder="#{placeholder.card_holder}" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="cardExpiry" class="form-label" th:text="#{label.card_expiry}">Expiry</label>
+                        <input type="text" id="cardExpiry" class="form-control form-control-dark" th:placeholder="#{placeholder.card_expiry}" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="cardCvc" class="form-label" th:text="#{label.card_cvc}">CVC</label>
+                        <input type="text" id="cardCvc" class="form-control form-control-dark" th:placeholder="#{placeholder.card_cvc}" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success w-100 mt-4" th:text="#{button.pay_now}">Pay Now (Simulation)</button>
+            </form>
+        </div>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

@@ -3,6 +3,7 @@ package com.epam.finaltask.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,12 +24,16 @@ public class Voucher {
 
     private Double price;
 
+    @Enumerated(EnumType.STRING)
     private TourType tourType;
 
+    @Enumerated(EnumType.STRING)
     private TransferType transferType;
 
+    @Enumerated(EnumType.STRING)
     private HotelType hotelType;
 
+    @Enumerated(EnumType.STRING)
     private VoucherStatus status;
 
     private LocalDate arrivalDate;
@@ -37,6 +42,8 @@ public class Voucher {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference
+    @ToString.Exclude
     private User user;
 
     private boolean isHot;

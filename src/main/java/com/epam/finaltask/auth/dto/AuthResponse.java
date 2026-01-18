@@ -1,4 +1,8 @@
 package com.epam.finaltask.auth.dto;
 
-public record AuthResponse(String token) {
-}
+import jakarta.validation.constraints.NotEmpty;
+
+public record AuthResponse(
+        @NotEmpty
+        String token
+) { }

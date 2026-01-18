@@ -1,124 +1,120 @@
 package com.epam.finaltask.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.epam.finaltask.auth.dto.ChangePasswordRequest;
+import com.epam.finaltask.dto.UserDTO;
+import com.epam.finaltask.mapper.UserMapper;
+import com.epam.finaltask.model.Role;
+import com.epam.finaltask.model.User;
+import com.epam.finaltask.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import com.epam.finaltask.dto.UserDTO;
-import com.epam.finaltask.mapper.UserMapper;
-import com.epam.finaltask.model.User;
-import com.epam.finaltask.repository.UserRepository;
+class UserServiceImplTest {
 
-@ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+    @Mock private UserRepository userRepository;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private UserMapper userMapper;
 
-  @Mock
-  private UserRepository userRepository;
+    @InjectMocks
+    private UserServiceImpl userService;
 
-  @Mock
-  private PasswordEncoder passwordEncoder;
+    private User user;
+    private UserDTO userDTO;
 
-  @Mock
-  private UserMapper userMapper;
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-  @InjectMocks
-  private UserServiceImpl userService;
+        user = new User();
+        user.setId(UUID.randomUUID());
+        user.setUsername("testuser");
+        user.setPassword("encodedPass");
+        user.setActive(true);
+        user.setRole(Role.USER);
+        user.setBalance(BigDecimal.valueOf(100));
 
-  @Test
-  void getUserByUsername_UserExists_Success() {
-    // Given
-    String username = "existingUser";
-    User user = new User();
-    user.setUsername(username);
+        userDTO = new UserDTO();
+        userDTO.setId(user.getId().toString());
+        userDTO.setUsername("testuser");
+        userDTO.setPassword("rawPass");
+        userDTO.setRole("USER");
+        userDTO.setBalance(100.0);
+    }
 
-    UserDTO expectedUserDTO = new UserDTO();
-    expectedUserDTO.setUsername(username);
+    @Test
+    void register_ShouldEncodePasswordAndSaveUser() {
+        when(userMapper.toUser(any())).thenReturn(user);
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPass");
+        when(userRepository.save(any())).thenReturn(user);
+        when(userMapper.toUserDTO(any())).thenReturn(userDTO);
 
-    when(userRepository.findUserByUsername(username)).thenReturn(Optional.of(user));
-    when(userMapper.toUserDTO(any(User.class))).thenReturn(expectedUserDTO);
+        UserDTO result = userService.register(userDTO);
 
-    // When
-    UserDTO result = userService.getUserByUsername(username);
+        assertNotNull(result);
+        verify(passwordEncoder).encode("rawPass");
+        verify(userRepository).save(any(User.class));
+        verify(userMapper).toUserDTO(any(User.class));
+    }
 
-    // Then
-    assertNotNull(result, "The returned UserDTO should not be null");
-    assertEquals(expectedUserDTO.getUsername(), result.getUsername(),
-        "The username should match the expected value");
+    @Test
+    void getUserByUsername_ShouldReturnUserDTO_WhenExists() {
+        when(userRepository.findUserByUsername("testuser")).thenReturn(Optional.of(user));
+        when(userMapper.toUserDTO(user)).thenReturn(userDTO);
 
-    verify(userRepository, times(1)).findUserByUsername(username);
-    verify(userMapper, times(1)).toUserDTO(any(User.class));
-  }
+        UserDTO result = userService.getUserByUsername("testuser");
 
-  @Test
-  void changeAccountStatus_UserExist_Success() {
-    // Given
-    String userId = UUID.randomUUID().toString();
-    UserDTO userDTO = new UserDTO();
-    userDTO.setId(userId);
-    userDTO.setActive(true);
+        assertEquals("testuser", result.getUsername());
+    }
 
-    User user = new User();
-    user.setId(UUID.fromString(userId));
-    user.setActive(false);
+    @Test
+    void getUserByUsername_ShouldThrow_WhenUserNotFound() {
+        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.empty());
 
-    User updatedUser = new User();
-    updatedUser.setId(UUID.fromString(userId));
-    updatedUser.setActive(true);
+        assertThrows(UsernameNotFoundException.class, () -> userService.getUserByUsername("unknown"));
+    }
 
-    when(userRepository.findById(UUID.fromString(userId))).thenReturn(Optional.of(user));
-    when(userMapper.toUser(any(UserDTO.class))).thenReturn(updatedUser);
-    when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-    when(userMapper.toUserDTO(any(User.class))).thenReturn(userDTO);
+    @Test
+    void blockUser_ShouldDeactivateAndSaveUser() {
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+        when(userMapper.toUserDTO(any())).thenReturn(userDTO);
 
-    // When
-    UserDTO resultDTO = userService.changeAccountStatus(userDTO);
+        var result = userService.blockUser(user.getId().toString());
 
-    // Then
-    assertNotNull(resultDTO, "The returned UserDTO should not be null");
-    assertTrue(resultDTO.isActive(), "The account status should be updated to true");
+        assertTrue(result.isPresent());
+        verify(userRepository).save(any(User.class));
+        assertFalse(user.isActive());
+    }
 
-    verify(userRepository, times(1)).findById(UUID.fromString(userId));
-    verify(userRepository, times(1)).save(any(User.class));
-  }
+    @Test
+    void changePassword_ShouldUpdatePassword_WhenOldPasswordMatches() {
+        ChangePasswordRequest req = new ChangePasswordRequest("old", "new");
+        String initialEncodedPassword = "encodedPass";
+        String newEncodedPassword = "encodedNew";
 
+        user.setPassword(initialEncodedPassword);
 
-  @Test
-  void getUserById_UserExist_Success() {
-    // Given
-    UUID id = UUID.randomUUID();
-    User user = new User();
-    user.setId(id);
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
-    UserDTO expectedUserDTO = new UserDTO();
-    expectedUserDTO.setId(id.toString());
+        when(passwordEncoder.matches(req.oldPassword(), initialEncodedPassword)).thenReturn(true);
 
-    when(userRepository.findById(id)).thenReturn(Optional.of(user));
-    when(userMapper.toUserDTO(any(User.class))).thenReturn(expectedUserDTO);
+        when(passwordEncoder.encode(req.newPassword())).thenReturn(newEncodedPassword);
 
-    // When
-    UserDTO resultDTO = userService.getUserById(id);
+        when(userMapper.toUserDTO(any())).thenReturn(userDTO);
 
-    // Then
-    assertNotNull(resultDTO, "The returned UserDTO should not be null");
-    assertEquals(expectedUserDTO.getId(), resultDTO.getId(),
-        "The user ID should match the expected value");
+        var result = userService.changePassword(user.getId().toString(), req);
 
-    verify(userRepository, times(1)).findById(id);
-    verify(userMapper, times(1)).toUserDTO(any(User.class));
-  }
+        assertTrue(result.isPresent());
 
+        verify(userRepository).save(user);
+    }
 }
